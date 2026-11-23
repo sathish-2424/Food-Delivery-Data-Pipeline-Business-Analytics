@@ -3,8 +3,15 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+try:
+    from streamlit_autorefresh import st_autorefresh
+except ImportError:  # app still runs if the package isn't installed yet
+    st_autorefresh = None
+
 
 DATA_DIR = Path(__file__).resolve().parent / "Dataset"
+REFRESH_SECONDS = 600  # 10 minutes
+
 REQUIRED = {
     "orders": {"order_id", "user_id", "restaurant_id", "order_timestamp", "order_status", "delivery_city", "delivery_time_mins", "subtotal", "delivery_fee", "total_amount"},
     "users": {"user_id", "membership_tier"},
@@ -13,26 +20,34 @@ REQUIRED = {
 }
 
 st.set_page_config(page_title="Food Delivery | Analytics", page_icon=":material/analytics:", layout="wide")
+
+# Rerun the script every 10 minutes while a tab is open
+if st_autorefresh is not None:
+    st_autorefresh(interval=REFRESH_SECONDS * 1000, key="auto_refresh_10min")
+
 st.markdown("""
 <style>
   html, body, [class*="css"] { font-family: system-ui, sans-serif; }
-  .stApp { background: #f8fafc; }
-  h1, h2, h3 { color: #1e3a8a; }
-  [data-testid="stMetric"] { background: white; border: 1px solid #dbeafe; padding: 16px 18px; border-radius: 12px; }
-  [data-testid="stMetricLabel"] { color: #475569; }
-  [data-testid="stMetricValue"] { color: #1e40af; font-family: 'Fira Code', monospace; }
-  div[data-testid="stDataFrame"] { border: 1px solid #dbeafe; border-radius: 10px; }
+  .stApp, [data-testid="stHeader"], [data-testid="stSidebar"] { background: #000000; }
+  [data-testid="stSidebar"] { border-right: 1px solid #262626; }
+  h1, h2, h3 { color: #f8fafc; }
+  [data-testid="stMetric"] { background: #0a0a0a; border: 1px solid #262626; padding: 16px 18px; border-radius: 12px; }
+  [data-testid="stMetricLabel"] { color: #a3a3a3; }
+  [data-testid="stMetricValue"] { color: #60a5fa; font-family: 'Fira Code', monospace; }
+  div[data-testid="stDataFrame"] { border: 1px solid #262626; border-radius: 10px; }
 </style>
 """, unsafe_allow_html=True)
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=REFRESH_SECONDS)
 def load_data():
     frames = {}
     for name, required in REQUIRED.items():
-        path = DATA_DIR / f"{name}.csv"
-        if not path.is_file():
-            raise FileNotFoundError(f"Required file not found: {path.name}")
+        # case-insensitive filename match (orders.csv / Orders.csv)
+        matches = [p for p in DATA_DIR.glob("*.csv") if p.stem.lower() == name]
+        if not matches:
+            raise FileNotFoundError(f"Required file not found: {name}.csv in {DATA_DIR}")
+        path = matches[0]
         frame = pd.read_csv(path)
         missing = required - set(frame.columns)
         if missing:
@@ -53,12 +68,16 @@ def load_data():
     orders = orders.merge(users, on="user_id", how="left").merge(restaurants, on="restaurant_id", how="left")
     orders["membership_tier"] = orders["membership_tier"].fillna("Unknown")
     orders["restaurant_name"] = orders["restaurant_name"].fillna("Unknown")
-    orders["payment_method"] = orders["order_id"].map(payments.drop_duplicates("order_id").set_index("order_id")["payment_method"]).fillna("Unknown")
+    orders["payment_method"] = (
+        orders["order_id"]
+        .map(payments.drop_duplicates("order_id").set_index("order_id")["payment_method"])
+        .fillna("Unknown")
+    )
     return orders, payments
 
 
 st.sidebar.title("Food Delivery")
-st.sidebar.caption("CSV-backed analytics · refreshes every 60 seconds")
+st.sidebar.caption("CSV-backed analytics · refreshes every 10 minutes")
 if st.sidebar.button("Refresh CSV data", use_container_width=True):
     load_data.clear()
 
@@ -80,10 +99,16 @@ selected_cities = st.sidebar.multiselect("Delivery city", cities, default=cities
 selected_tiers = st.sidebar.multiselect("Membership tier", tiers, default=tiers)
 selected_methods = st.sidebar.multiselect("Payment method", methods, default=methods)
 
-if isinstance(date_range, tuple) and len(date_range) == 2:
-    start_date, end_date = date_range
+if isinstance(date_range, (tuple, list)):
+    if len(date_range) == 2:
+        start_date, end_date = date_range
+    elif len(date_range) == 1:  # user has picked only the first date so far
+        start_date = end_date = date_range[0]
+    else:
+        start_date, end_date = min_date, max_date
 else:
     start_date = end_date = date_range
+
 filtered = orders[
     orders["order_date"].between(start_date, end_date)
     & orders["delivery_city"].isin(selected_cities)
@@ -94,10 +119,9 @@ delivered = filtered[filtered["order_status"].eq("Delivered")]
 
 gmv = delivered["total_amount"].sum()
 aov = delivered["subtotal"].mean()
-avg_delivery = delivered["delivery_time_mins"].mean()
-success_ids = set(filtered["order_id"])
+visible_order_ids = set(filtered["order_id"])
 visible_payments = payments[
-    payments["order_id"].isin(success_ids) & payments["payment_method"].isin(selected_methods)
+    payments["order_id"].isin(visible_order_ids) & payments["payment_method"].isin(selected_methods)
 ]
 failure_pct = 100 * visible_payments["payment_status"].eq("Failed").mean() if len(visible_payments) else 0
 
@@ -159,4 +183,4 @@ else:
 with st.expander("Order status mix and data notes"):
     status = filtered["order_status"].value_counts().rename_axis("order_status").reset_index(name="orders")
     st.dataframe(status, hide_index=True, use_container_width=True)
-    st.caption("Cancelled and failed order statuses are recorded outcomes, not measured checkout abandonment. GMV is the sum of total_amount for delivered orders. Data refreshes from CSV every 60 seconds; use the sidebar button to refresh immediately.")
+    st.caption("Cancelled and failed order statuses are recorded outcomes, not measured checkout abandonment. GMV is the sum of total_amount for delivered orders. Data refreshes from CSV every 10 minutes; use the sidebar button to refresh immediately.")
