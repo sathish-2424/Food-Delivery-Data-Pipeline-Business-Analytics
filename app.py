@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 
-DATA_DIR = Path(__file__).resolve().parent
+DATA_DIR = Path(__file__).resolve().parent / "Dataset"
 REQUIRED = {
     "orders": {"order_id", "user_id", "restaurant_id", "order_timestamp", "order_status", "delivery_city", "delivery_time_mins", "subtotal", "delivery_fee", "total_amount"},
     "users": {"user_id", "membership_tier"},
