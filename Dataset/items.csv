@@ -1,0 +1,29 @@
+item_id,restaurant_id,item_name,category_id,price
+1001,101,Chicken Chettinad Masala,2,280.0
+1002,101,Mutton Sukka,2,340.0
+1003,101,Parotta (2 Pcs),1,70.0
+1004,102,Hyderabadi Chicken Dum Biryani,2,299.0
+1005,102,Paneer Tikka Biryani,1,269.0
+1006,102,Gulab Jamun (2 Pcs),4,89.0
+1007,103,Ghee Roast Masala Dosa,1,130.0
+1008,103,Paneer Butter Masala,1,220.0
+1009,103,Filter Coffee,4,50.0
+1010,104,All American Cheese Burger,2,260.0
+1011,104,Peri Peri Fries,1,140.0
+1012,104,Ferrero Rocher Shake,4,190.0
+1013,105,Royal Chicken Biryani,2,310.0
+1014,105,Double Ka Meetha,4,110.0
+1015,106,Mini Tiffin Combo,1,165.0
+1016,106,Rava Kesari,4,85.0
+1017,107,Butter Chicken,2,320.0
+1018,107,Garlic Naan,1,65.0
+1019,108,Prawn Ghee Roast,2,390.0
+1020,108,Neer Dosa,1,80.0
+1021,109,Quinoa Avocado Buddha Bowl,3,290.0
+1022,109,Almond Milk Matcha Latte,3,180.0
+1023,110,Punjabi Samosa (2 Pcs),1,60.0
+1024,110,Ginger Elaichi Chai,4,45.0
+1025,111,Seeraga Samba Mutton Biryani,2,360.0
+1026,111,Chicken 65,2,230.0
+1027,112,Margherita Woodfired Pizza,1,275.0
+1028,112,Pepperoni Feast Pizza,2,385.0

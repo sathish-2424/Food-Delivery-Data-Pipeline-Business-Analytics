@@ -1,0 +1,13 @@
+restaurant_id,restaurant_name,city,cuisine_type,rating,avg_prep_time_mins
+101,Anjappar Chettinad Restaurant,Chennai,South Indian,4.3,32
+102,Biryani Blues,Bengaluru,Biryani & North Indian,4.1,38
+103,Green Leaf Pure Veg,Vellore,Vegetarian,4.4,25
+104,Truffles Ice & Spice,Bengaluru,Continental & Burgers,4.6,40
+105,Paradise Biryani,Hyderabad,Hyderabadi,4.2,35
+106,Sangeetha Veg Restaurant,Chennai,South Indian,4.5,28
+107,Tandoori Nights,Delhi,Mughlai,3.9,45
+108,Coastal Spice Kitchen,Mumbai,Seafood & Coastal,4.3,42
+109,Bowl & Sprout Vegan Cafe,Bengaluru,Healthy & Vegan,4.4,30
+110,Chai & Samosa Junction,Chennai,Snacks & Beverages,4.0,20
+111,Dindigul Thalappakatti,Chennai,Biryani,4.4,34
+112,Pizza Artisans,Mumbai,Italian,4.1,36
