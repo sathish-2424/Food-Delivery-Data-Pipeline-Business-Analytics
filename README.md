@@ -19,4 +19,6 @@ The supplied orders contain **₹5,10,080.10 delivered GMV across 1,054 delivere
 5. Re-run the three `CREATE TABLE AS SELECT` statements at the end of `schema_and_analytics.sql` to refresh `mart_city_gmv`, `mart_restaurant_sla_tiers`, and `mart_payment_failure_rates`.
 6. Connect Power BI, Tableau, or Streamlit to those three mart tables. For example, start with `SELECT * FROM mart_city_gmv ORDER BY delivered_gmv_inr DESC;`.
 
+[Open the live dashboard](https://food-delivery-data-pipeline-business-analytics.streamlit.app/)
+
 The source also retains the original analytics SELECT queries. To reload from scratch, drop/recreate the database schema before loading; rerunning the loader itself is safe for existing primary keys. The loader expects the CSV headers and MySQL schema in this folder to match.
